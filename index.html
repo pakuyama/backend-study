@@ -1,0 +1,748 @@
+<title>백엔드 개념 단어장</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* 레이아웃: 상단 고정 탭바 + 가운데 단일 컬럼(최대 760px). 카드는 HTTP 요청/응답처럼 "앞면=요청, 뒷면=응답" */
+:root {
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --sunken: #e9edf3;
+  --line: #d6dce6;
+  --fg: #18202c;
+  --muted: #5d6878;
+  --accent: #2456c7;
+  --accent-soft: #e3eafb;
+  --on-accent: #ffffff;
+  --ok: #1d7f4e;
+  --ok-soft: #dff3e8;
+  --err: #c0392b;
+  --err-soft: #fbe5e2;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Consolas, "D2Coding", monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151c; --surface: #191f29; --sunken: #212834; --line: #2e3746;
+    --fg: #e5e9f0; --muted: #98a3b4; --accent: #7aa2ff; --accent-soft: #1f2a44; --on-accent: #0d1424;
+    --ok: #5cc98d; --ok-soft: #173326; --err: #ff8a7a; --err-soft: #3a1f1c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151c; --surface: #191f29; --sunken: #212834; --line: #2e3746;
+  --fg: #e5e9f0; --muted: #98a3b4; --accent: #7aa2ff; --accent-soft: #1f2a44; --on-accent: #0d1424;
+  --ok: #5cc98d; --ok-soft: #173326; --err: #ff8a7a; --err-soft: #3a1f1c;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mono { font-family: var(--font-mono); }
+
+/* ---------- 상단 ---------- */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.top-inner, .wrap { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.top-inner { display: flex; flex-direction: column; gap: 10px; padding-block: 14px 0; }
+.brand { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand h1 { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+.brand h1 .mono { color: var(--accent); font-size: 15px; font-weight: 600; margin-right: 6px; }
+.meter { display: flex; gap: 14px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; flex-wrap: wrap; }
+.meter b { color: var(--fg); font-weight: 600; }
+.tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+.tabs a { padding: 8px 14px 10px; color: var(--muted); text-decoration: none; font-weight: 500; border-bottom: 2px solid transparent; white-space: nowrap; }
+.tabs a[aria-current="page"] { color: var(--fg); border-bottom-color: var(--accent); }
+.tabs .count { font-family: var(--font-mono); font-size: 12px; margin-left: 4px; padding: 0 6px; border-radius: 99px; background: var(--err-soft); color: var(--err); }
+
+.wrap { padding-block: 22px 60px; display: flex; flex-direction: column; gap: 18px; }
+.view[hidden] { display: none; }
+
+/* ---------- 공통 ---------- */
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 4px 12px; font-size: 13px; color: var(--muted); }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 9px 16px; font-weight: 500; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.ok { background: var(--ok); border-color: var(--ok); color: var(--bg); }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--muted); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.row.between { justify-content: space-between; }
+.hint { font-size: 13px; color: var(--muted); }
+.cat-tag { font-size: 12px; color: var(--muted); letter-spacing: .02em; }
+.toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; }
+.empty { text-align: center; color: var(--muted); padding: 36px 16px; }
+.empty b { display: block; color: var(--fg); font-size: 16px; margin-bottom: 4px; }
+.status { font-family: var(--font-mono); font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 5px; }
+.status.ok { background: var(--ok-soft); color: var(--ok); }
+.status.err { background: var(--err-soft); color: var(--err); }
+
+/* ---------- 암기 카드 ---------- */
+.flash { perspective: 1400px; }
+.flash-inner { position: relative; min-height: 300px; transition: transform .45s cubic-bezier(.2,.7,.2,1); transform-style: preserve-3d; cursor: pointer; }
+.flash.flipped .flash-inner { transform: rotateY(180deg); }
+.face { position: absolute; inset: 0; backface-visibility: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px; display: flex; flex-direction: column; gap: 12px; overflow: auto; }
+.face.back { transform: rotateY(180deg); }
+.face-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.face-head .verb { color: var(--accent); font-weight: 600; }
+.front-body { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 6px; }
+.term { font-size: clamp(28px, 6vw, 38px); font-weight: 700; letter-spacing: -0.02em; text-wrap: balance; line-height: 1.25; }
+.en { font-family: var(--font-mono); font-size: 14px; color: var(--muted); }
+.known-mark { font-size: 12px; color: var(--ok); font-weight: 600; }
+.back .term-sm { font-size: 20px; font-weight: 700; }
+.def { font-size: 16px; line-height: 1.7; margin: 0; max-width: 62ch; }
+.ex { font-family: var(--font-mono); font-size: 13px; background: var(--sunken); border-radius: 8px; padding: 10px 12px; white-space: pre-wrap; word-break: break-word; margin: 0; color: var(--fg); }
+.flip-hint { text-align: center; font-size: 12px; color: var(--muted); }
+.card-nav { display: grid; grid-template-columns: auto 1fr 1fr auto; gap: 8px; }
+.card-nav .btn { padding-inline: 12px; }
+.progress-line { height: 4px; background: var(--sunken); border-radius: 99px; overflow: hidden; }
+.progress-line > div { height: 100%; background: var(--accent); transition: width .3s; }
+@media (max-width: 480px) {
+  .card-nav { grid-template-columns: 1fr 1fr; }
+  .card-nav .nav-arrow { display: none; }
+}
+
+/* ---------- 목록 ---------- */
+.search { width: 100%; padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.group h2 { font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: .03em; margin: 8px 0 6px; }
+.items { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.item { display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--line); }
+.item:first-child { border-top: 0; }
+.item input { margin-top: 5px; width: 16px; height: 16px; accent-color: var(--ok); }
+.item .name { font-weight: 600; }
+.item .name .en { font-size: 12px; margin-left: 6px; }
+.item p { margin: 2px 0 0; color: var(--muted); font-size: 14px; min-width: 0; }
+
+/* ---------- 퀴즈 ---------- */
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field > span { font-size: 13px; font-weight: 600; }
+.q-meta { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.q-prompt { font-size: 18px; line-height: 1.6; margin: 6px 0 4px; text-wrap: pretty; }
+.q-prompt.is-term { font-size: 28px; font-weight: 700; }
+.choices { display: grid; gap: 8px; }
+.choice { text-align: left; display: grid; grid-template-columns: 26px 1fr; gap: 8px; align-items: start; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 12px 14px; line-height: 1.5; }
+.choice .k { font-family: var(--font-mono); font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; text-align: center; line-height: 20px; }
+.choice:hover:not(:disabled) { border-color: var(--accent); }
+.choice:disabled { cursor: default; }
+.choice.right { border-color: var(--ok); background: var(--ok-soft); }
+.choice.wrong { border-color: var(--err); background: var(--err-soft); }
+.feedback { display: flex; flex-direction: column; gap: 8px; border-top: 1px dashed var(--line); padding-top: 14px; }
+.score { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.score .big { font-size: 44px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+.history { display: flex; gap: 4px; align-items: flex-end; height: 40px; }
+.history div { width: 14px; background: var(--accent); border-radius: 3px 3px 0 0; opacity: .75; }
+
+/* ---------- 오답노트 ---------- */
+.note { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 14px 16px; border-top: 1px solid var(--line); }
+.note:first-child { border-top: 0; }
+.note .name { font-weight: 600; }
+.note p { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 14px; }
+.note .side { display: flex; align-items: center; gap: 8px; }
+.note .times { font-family: var(--font-mono); font-size: 12px; color: var(--err); }
+
+.foot { font-size: 12px; color: var(--muted); text-align: center; }
+@media (prefers-reduced-motion: reduce) { .flash-inner, .progress-line > div { transition: none; } }
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <h1><span class="mono">GET /backend</span>백엔드 개념 단어장</h1>
+      <div class="meter" id="meter"></div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <a href="#cards" data-tab="cards">암기 카드</a>
+      <a href="#list" data-tab="list">전체 목록</a>
+      <a href="#quiz" data-tab="quiz">퀴즈</a>
+      <a href="#notes" data-tab="notes">오답노트<span class="count" id="noteCount" hidden></span></a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="view" id="view-cards"></section>
+  <section class="view" id="view-list" hidden></section>
+  <section class="view" id="view-quiz" hidden></section>
+  <section class="view" id="view-notes" hidden></section>
+  <p class="foot" id="saveInfo">진행 상황은 이 브라우저에 저장됩니다</p>
+</main>
+
+<script>
+// ================= 데이터 =================
+const CATS = [
+  { id: 'net',  name: 'HTTP·네트워크' },
+  { id: 'api',  name: 'API' },
+  { id: 'db',   name: '데이터베이스' },
+  { id: 'sec',  name: '인증·보안' },
+  { id: 'arch', name: '아키텍처·인프라' },
+  { id: 'conc', name: '동시성·운영' },
+];
+
+const TERMS = [
+  // HTTP·네트워크
+  { id: 'http', c: 'net', t: 'HTTP', en: 'HyperText Transfer Protocol',
+    d: '클라이언트가 요청(Request)을 보내고 서버가 응답(Response)을 돌려주는 웹 통신 프로토콜. 서버가 이전 요청을 기억하지 않는 무상태(stateless) 방식이다.',
+    ex: 'GET /users/1 HTTP/1.1\nHost: api.example.com' },
+  { id: 'method', c: 'net', t: 'HTTP 메서드', en: 'HTTP Method',
+    d: '요청의 의도를 나타내는 동사. GET은 조회, POST는 생성, PUT은 전체 수정, PATCH는 부분 수정, DELETE는 삭제에 쓴다.',
+    ex: 'POST /posts   → 글 작성\nPATCH /posts/7 → 제목만 수정' },
+  { id: 'status', c: 'net', t: 'HTTP 상태 코드', en: 'Status Code',
+    d: '요청 처리 결과를 세 자리 숫자로 알려준다. 2xx 성공, 3xx 리다이렉트, 4xx 클라이언트 잘못, 5xx 서버 잘못.',
+    ex: '200 OK · 201 Created · 404 Not Found · 500 Internal Server Error' },
+  { id: 'idempotent', c: 'net', t: '멱등성', en: 'Idempotency',
+    d: '같은 요청을 여러 번 보내도 한 번 보낸 것과 결과가 같은 성질. GET·PUT·DELETE는 멱등이고 POST는 멱등이 아니다.',
+    ex: 'DELETE /orders/3 를 두 번 → 결과는 "3번 주문 없음" 그대로' },
+  { id: 'dns', c: 'net', t: 'DNS', en: 'Domain Name System',
+    d: '사람이 읽는 도메인 이름을 컴퓨터가 쓰는 IP 주소로 바꿔주는 시스템. 인터넷의 전화번호부.',
+    ex: 'api.example.com → 93.184.216.34' },
+  { id: 'tcpudp', c: 'net', t: 'TCP / UDP', en: 'Transport Protocols',
+    d: 'TCP는 연결을 맺고 순서와 전달을 보장한다(웹, 파일 전송). UDP는 연결 없이 빠르게 보내지만 유실될 수 있다(실시간 영상, 게임).',
+    ex: 'TCP: 3-way handshake (SYN → SYN-ACK → ACK)' },
+  { id: 'https', c: 'net', t: 'HTTPS / TLS', en: 'HTTP over TLS',
+    d: 'TLS로 HTTP 통신을 암호화한 것. 인증서로 서버가 진짜인지 확인하고, 중간에서 내용을 엿보거나 바꾸지 못하게 한다.',
+    ex: 'https://  기본 포트 443  (HTTP는 80)' },
+  { id: 'cors', c: 'net', t: 'CORS', en: 'Cross-Origin Resource Sharing',
+    d: '브라우저가 다른 출처(도메인·포트·프로토콜)의 API를 호출할 때, 서버가 응답 헤더로 허용 여부를 알려주는 정책.',
+    ex: 'Access-Control-Allow-Origin: https://myapp.com' },
+  { id: 'cookie', c: 'net', t: '쿠키와 세션', en: 'Cookie & Session',
+    d: '쿠키는 브라우저에 저장되어 요청마다 함께 전송되는 작은 데이터. 세션은 사용자 상태를 서버에 저장하고 그 열쇠(세션 ID)만 쿠키로 주고받는 방식.',
+    ex: 'Set-Cookie: SESSIONID=a8f3...; HttpOnly; Secure' },
+
+  // API
+  { id: 'api', c: 'api', t: 'API', en: 'Application Programming Interface',
+    d: '프로그램끼리 기능과 데이터를 주고받기 위해 정해둔 약속(인터페이스). 무엇을 요청하면 무엇을 돌려주는지 정의한다.',
+    ex: '날씨 API: GET /weather?city=Seoul → {"temp": 18}' },
+  { id: 'rest', c: 'api', t: 'REST', en: 'Representational State Transfer',
+    d: '자원(Resource)을 URI로 표현하고, 그 자원에 대한 행위를 HTTP 메서드로 표현하는 API 설계 스타일.',
+    ex: 'GET /users      목록\nGET /users/1    1번 사용자\nDELETE /users/1 삭제' },
+  { id: 'json', c: 'api', t: 'JSON', en: 'JavaScript Object Notation',
+    d: '키-값 쌍으로 데이터를 표현하는 텍스트 형식. 사람이 읽기 쉽고 대부분의 API 요청·응답 본문에 쓰인다.',
+    ex: '{ "id": 1, "name": "kim", "tags": ["admin"] }' },
+  { id: 'graphql', c: 'api', t: 'GraphQL', en: 'GraphQL',
+    d: '클라이언트가 필요한 필드만 쿼리로 골라 요청하는 API 방식. 보통 엔드포인트가 하나뿐이고, 과다·과소 조회 문제를 줄인다.',
+    ex: 'query { user(id: 1) { name email } }' },
+  { id: 'websocket', c: 'api', t: '웹소켓', en: 'WebSocket',
+    d: '한 번 연결한 뒤 서버와 클라이언트가 양방향으로 실시간 메시지를 주고받는 프로토콜. 채팅, 실시간 알림, 주식 시세에 쓴다.',
+    ex: 'ws://chat.example.com  (HTTP Upgrade로 시작)' },
+  { id: 'pagination', c: 'api', t: '페이지네이션', en: 'Pagination',
+    d: '데이터가 많을 때 일부씩 나눠서 응답하는 방식. 페이지 번호로 자르는 offset 방식과, 마지막으로 본 항목 기준으로 이어가는 cursor 방식이 있다.',
+    ex: 'GET /posts?page=3&size=20\nGET /posts?after=post_981' },
+  { id: 'ratelimit', c: 'api', t: '레이트 리미팅', en: 'Rate Limiting',
+    d: '일정 시간 동안 받을 수 있는 요청 수를 제한해 서버를 보호하는 것. 한도를 넘으면 429 상태 코드를 돌려준다.',
+    ex: '429 Too Many Requests\nRetry-After: 30' },
+
+  // DB
+  { id: 'rdbms', c: 'db', t: '관계형 데이터베이스', en: 'RDBMS',
+    d: '데이터를 행과 열로 된 테이블에 저장하고, 테이블 사이의 관계를 SQL로 다루는 데이터베이스.',
+    ex: 'MySQL, PostgreSQL, Oracle\nSELECT * FROM users WHERE id = 1;' },
+  { id: 'nosql', c: 'db', t: 'NoSQL', en: 'Not only SQL',
+    d: '테이블 대신 문서, 키-값, 그래프 등 다양한 형태로 저장하는 데이터베이스. 스키마가 유연하고 수평 확장이 쉽다.',
+    ex: 'MongoDB(문서), Redis(키-값), Neo4j(그래프)' },
+  { id: 'key', c: 'db', t: '기본키 / 외래키', en: 'Primary Key / Foreign Key',
+    d: '기본키(PK)는 한 테이블에서 각 행을 유일하게 구분하는 값. 외래키(FK)는 다른 테이블의 기본키를 가리켜 두 테이블의 관계를 만든다.',
+    ex: 'orders.user_id  →  users.id' },
+  { id: 'index', c: 'db', t: '인덱스', en: 'Index',
+    d: '원하는 행을 빨리 찾기 위해 만드는 자료구조(주로 B-Tree). 조회는 빨라지지만 저장 공간이 들고 쓰기(INSERT/UPDATE)는 느려진다.',
+    ex: 'CREATE INDEX idx_users_email ON users(email);' },
+  { id: 'tx', c: 'db', t: '트랜잭션', en: 'Transaction',
+    d: '여러 DB 작업을 하나의 단위로 묶은 것. 모두 성공하면 커밋(COMMIT), 하나라도 실패하면 전부 되돌린다(ROLLBACK).',
+    ex: '계좌이체: A 출금 + B 입금 → 둘 다 되거나 둘 다 안 되거나' },
+  { id: 'acid', c: 'db', t: 'ACID', en: 'Atomicity · Consistency · Isolation · Durability',
+    d: '트랜잭션이 지켜야 할 네 가지 성질. 원자성(전부 아니면 전무), 일관성(규칙 유지), 격리성(서로 간섭 없음), 지속성(커밋되면 영구 저장).',
+    ex: 'A 원자성 · C 일관성 · I 격리성 · D 지속성' },
+  { id: 'normal', c: 'db', t: '정규화', en: 'Normalization',
+    d: '데이터 중복과 이상 현상을 줄이기 위해 테이블을 잘게 나누는 설계 과정. 성능을 위해 일부러 다시 합치는 것은 역정규화라고 한다.',
+    ex: '주문 테이블에 고객 주소 반복 저장 → 고객 테이블로 분리' },
+  { id: 'join', c: 'db', t: '조인', en: 'JOIN',
+    d: '공통 컬럼을 기준으로 두 개 이상의 테이블을 연결해 한 번에 조회하는 SQL 연산. INNER JOIN, LEFT JOIN 등이 있다.',
+    ex: 'SELECT o.id, u.name FROM orders o\nJOIN users u ON o.user_id = u.id;' },
+  { id: 'n1', c: 'db', t: 'N+1 문제', en: 'N+1 Query Problem',
+    d: '목록을 1번 조회한 뒤 각 항목의 연관 데이터를 가져오느라 추가 쿼리가 N번 더 나가는 성능 문제. JOIN이나 한 번에 묶어 조회(fetch join, IN 절)로 해결한다.',
+    ex: '게시글 100개 조회 1번 + 작성자 조회 100번 = 쿼리 101번' },
+  { id: 'orm', c: 'db', t: 'ORM', en: 'Object-Relational Mapping',
+    d: '프로그래밍 언어의 객체와 DB 테이블을 연결해, SQL을 직접 쓰지 않고 코드로 데이터를 다루게 해주는 기술.',
+    ex: 'JPA(Java), Prisma(Node), SQLAlchemy(Python)\nuser = User.find(1)' },
+
+  // 인증·보안
+  { id: 'auth', c: 'sec', t: '인증 vs 인가', en: 'Authentication vs Authorization',
+    d: '인증은 "당신이 누구인지" 확인하는 것(로그인). 인가는 "당신이 이걸 해도 되는지" 권한을 확인하는 것.',
+    ex: '401 Unauthorized → 인증 실패\n403 Forbidden    → 권한 없음' },
+  { id: 'jwt', c: 'sec', t: 'JWT', en: 'JSON Web Token',
+    d: '헤더.페이로드.서명 세 부분으로 된 토큰. 서버가 세션을 저장하지 않아도 서명을 검증해 위조 여부를 알 수 있다. 페이로드는 암호화가 아니라 인코딩일 뿐이다.',
+    ex: 'Authorization: Bearer eyJhbGciOi...' },
+  { id: 'oauth', c: 'sec', t: 'OAuth 2.0', en: 'Open Authorization',
+    d: '비밀번호를 넘기지 않고 다른 서비스에 내 정보 접근 권한을 위임하는 표준. 액세스 토큰을 발급받아 사용한다.',
+    ex: '"구글 계정으로 로그인" 버튼' },
+  { id: 'hash', c: 'sec', t: '비밀번호 해싱', en: 'Password Hashing',
+    d: '비밀번호를 되돌릴 수 없는 단방향 해시로 바꿔 저장하는 것. 같은 비밀번호도 결과가 다르도록 솔트(salt)를 섞는다.',
+    ex: 'bcrypt, argon2  (MD5·SHA-1 단독 사용 금지)' },
+  { id: 'sqli', c: 'sec', t: 'SQL 인젝션', en: 'SQL Injection',
+    d: '입력값에 SQL 구문을 끼워 넣어 개발자가 의도하지 않은 쿼리를 실행시키는 공격. Prepared Statement(파라미터 바인딩)로 막는다.',
+    ex: "아이디 입력: ' OR '1'='1" },
+  { id: 'xss', c: 'sec', t: 'XSS / CSRF', en: 'Cross-Site Scripting / Request Forgery',
+    d: 'XSS는 페이지에 악성 스크립트를 심어 다른 사용자 브라우저에서 실행시키는 공격. CSRF는 로그인된 사용자의 브라우저가 원치 않는 요청을 보내도록 속이는 공격.',
+    ex: 'XSS 방어: 출력 이스케이프\nCSRF 방어: CSRF 토큰, SameSite 쿠키' },
+
+  // 아키텍처·인프라
+  { id: 'cache', c: 'arch', t: '캐시', en: 'Cache',
+    d: '자주 쓰는 데이터를 더 빠른 저장소(주로 메모리)에 잠시 보관해 응답을 빠르게 하는 것. 만료 시간(TTL)과 데이터가 바뀌었을 때의 무효화가 핵심이다.',
+    ex: 'Redis에 인기글 목록 저장, TTL 60초' },
+  { id: 'lb', c: 'arch', t: '로드 밸런서', en: 'Load Balancer',
+    d: '들어오는 요청을 여러 서버에 골고루 나눠 보내는 장치. 한 서버가 죽어도 다른 서버로 보내 서비스를 유지한다.',
+    ex: '라운드 로빈: 서버1 → 서버2 → 서버3 → 서버1 …' },
+  { id: 'scale', c: 'arch', t: '스케일 업 / 스케일 아웃', en: 'Vertical / Horizontal Scaling',
+    d: '스케일 업은 서버 한 대의 CPU·메모리를 키우는 것(수직 확장). 스케일 아웃은 서버 대수를 늘리는 것(수평 확장).',
+    ex: '업: 8GB → 64GB 서버로 교체\n아웃: 서버 2대 → 10대' },
+  { id: 'mq', c: 'arch', t: '메시지 큐', en: 'Message Queue',
+    d: '보내는 쪽이 메시지를 큐에 넣으면 받는 쪽이 나중에 꺼내 처리하는 구조. 오래 걸리는 작업을 비동기로 분리하고 서비스 간 결합을 줄인다.',
+    ex: 'Kafka, RabbitMQ, SQS\n주문 완료 → 큐 → 이메일 발송 서버' },
+  { id: 'msa', c: 'arch', t: '마이크로서비스', en: 'Microservices (MSA)',
+    d: '하나의 큰 애플리케이션을 기능별로 독립 배포 가능한 작은 서비스들로 나눈 구조. 모든 기능이 한 덩어리인 구조는 모놀리식이라 한다.',
+    ex: '회원 서비스 · 주문 서비스 · 결제 서비스' },
+  { id: 'docker', c: 'arch', t: '컨테이너 / 도커', en: 'Container / Docker',
+    d: '애플리케이션과 실행에 필요한 환경을 이미지로 묶어, 어느 컴퓨터에서든 똑같이 실행되게 하는 기술. 여러 컨테이너 관리는 쿠버네티스가 맡는다.',
+    ex: 'docker run -p 8080:8080 my-api:1.0' },
+  { id: 'cicd', c: 'arch', t: 'CI/CD', en: 'Continuous Integration / Delivery',
+    d: '코드를 올리면 자동으로 빌드·테스트하고(CI), 통과하면 자동으로 배포까지 하는(CD) 파이프라인.',
+    ex: 'git push → 테스트 → 이미지 빌드 → 배포' },
+  { id: 'proxy', c: 'arch', t: '리버스 프록시', en: 'Reverse Proxy',
+    d: '클라이언트 요청을 앞에서 받아 뒤쪽 서버로 전달하는 서버. HTTPS 처리, 정적 파일 제공, 로드 밸런싱을 맡기도 한다.',
+    ex: 'Nginx  :443  →  localhost:3000 (Node 앱)' },
+  { id: 'cdn', c: 'arch', t: 'CDN', en: 'Content Delivery Network',
+    d: '이미지·JS·CSS 같은 정적 파일을 사용자와 가까운 곳의 서버에 복사해두고 제공해 로딩을 빠르게 하는 네트워크.',
+    ex: '서울 사용자 → 서울 엣지 서버에서 이미지 응답' },
+
+  // 동시성·운영
+  { id: 'thread', c: 'conc', t: '프로세스 vs 스레드', en: 'Process vs Thread',
+    d: '프로세스는 운영체제로부터 독립된 메모리를 받아 실행되는 프로그램. 스레드는 한 프로세스 안에서 메모리를 공유하며 동시에 실행되는 흐름.',
+    ex: '크롬 탭 = 프로세스, 탭 안의 작업들 = 스레드' },
+  { id: 'async', c: 'conc', t: '동기 vs 비동기', en: 'Sync vs Async',
+    d: '동기는 작업이 끝날 때까지 기다린 뒤 다음으로 넘어간다. 비동기는 기다리지 않고 다음 일을 하다가 작업이 끝나면 결과를 받는다.',
+    ex: 'const res = await fetch(url);  // 기다리는 동안 다른 요청 처리' },
+  { id: 'race', c: 'conc', t: '경쟁 조건', en: 'Race Condition',
+    d: '여러 스레드나 요청이 같은 데이터를 동시에 바꿀 때, 실행 순서에 따라 결과가 달라지는 문제. 락(lock)이나 원자적 연산으로 막는다.',
+    ex: '재고 1개에 두 명이 동시에 주문 → 둘 다 성공' },
+  { id: 'deadlock', c: 'conc', t: '교착 상태', en: 'Deadlock',
+    d: '두 작업이 서로 상대가 가진 자원을 기다리느라 둘 다 영원히 멈춰 있는 상태.',
+    ex: 'T1: A 잠금 → B 대기\nT2: B 잠금 → A 대기' },
+  { id: 'log', c: 'conc', t: '로깅과 모니터링', en: 'Logging & Monitoring',
+    d: '서버에서 일어난 일을 기록(로그)하고, 응답 시간·에러율·CPU 같은 지표를 수집해 문제를 빨리 발견하는 것.',
+    ex: '[ERROR] 2026-10-27 14:02 POST /orders 500 (312ms)' },
+];
+const BY_ID = Object.fromEntries(TERMS.map((t) => [t.id, t]));
+const CAT_NAME = Object.fromEntries(CATS.map((c) => [c.id, c.name]));
+
+// ================= 저장 =================
+// 로그인한 claude.ai 사용자: 계정별 비공개 저장소(db) / 그 외: 이 브라우저(localStorage)
+const LS_KEY = 'backend-vocab-v1';
+let progress = blankProgress();
+let store = { kind: 'local' };
+let saveTimer = null, saving = Promise.resolve();
+
+function blankProgress() { return { known: {}, wrong: {}, history: [] }; }
+function normalize(p) {
+  const n = blankProgress();
+  if (p && typeof p === 'object') {
+    for (const k of ['known', 'wrong']) if (p[k] && typeof p[k] === 'object') n[k] = JSON.parse(JSON.stringify(p[k]));
+    if (Array.isArray(p.history)) n.history = p.history.slice(-20);
+  }
+  for (const id of Object.keys(n.known)) if (!BY_ID[id]) delete n.known[id];
+  for (const id of Object.keys(n.wrong)) if (!BY_ID[id]) delete n.wrong[id];
+  return n;
+}
+function readLocal() { try { const s = localStorage.getItem(LS_KEY); return s ? JSON.parse(s) : null; } catch { return null; } }
+function writeLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify(progress)); } catch {} }
+
+function save() {
+  writeLocal();
+  if (store.kind !== 'db') return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    const body = JSON.parse(JSON.stringify(progress));
+    saving = saving.then(() => store.ref.set(body)).catch((e) => {
+      if (e && (e.code === 'invalid_argument' || e.code === 'revoked' || e.code === 'not_granted')) {
+        store = { kind: 'local' };
+        setSaveInfo();
+      }
+    });
+  }, 700);
+}
+
+async function initCloud() {
+  const c = window.claude;
+  if (!c || typeof c.use !== 'function') return;
+  try {
+    const [db, user] = await Promise.all([c.use('db'), c.use('user')]);
+    if (!db || !user) return;
+    const uid = await user.id();
+    if (!uid) return;
+    const ref = db.doc('data/users/' + uid + '/progress');
+    const snap = await ref.get();
+    if (snap.exists) {
+      progress = normalize(snap.data());
+      writeLocal();
+    } else {
+      await ref.set(JSON.parse(JSON.stringify(progress)));   // 브라우저에 있던 기록을 계정으로 옮김
+    }
+    store = { kind: 'db', ref };
+    setSaveInfo();
+    renderAll();
+  } catch { /* 브라우저 저장으로 계속 */ }
+}
+function setSaveInfo() {
+  $('saveInfo').textContent = store.kind === 'db'
+    ? '진행 상황은 내 계정에 저장됩니다 (나만 볼 수 있음)'
+    : '진행 상황은 이 브라우저에 저장됩니다';
+}
+
+// ================= 유틸 =================
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const knownCount = () => TERMS.filter((t) => progress.known[t.id]).length;
+const wrongIds = () => Object.keys(progress.wrong).sort((a, b) => (progress.wrong[b].n - progress.wrong[a].n) || (progress.wrong[b].at - progress.wrong[a].at));
+function fmtDate(ts) { const d = new Date(ts); return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; }
+function catChips(active, action) {
+  return `<div class="chips">` +
+    [{ id: 'all', name: '전체' }, ...CATS].map((c) =>
+      `<button class="chip" data-action="${action}" data-cat="${c.id}" aria-pressed="${active === c.id}">${esc(c.name)}</button>`).join('') +
+    `</div>`;
+}
+
+// ================= 화면 상태 =================
+const ui = {
+  tab: 'cards',
+  cards: { cat: 'all', onlyUnknown: false, order: TERMS.map((t) => t.id), idx: 0, flipped: false },
+  list: { q: '' },
+  quiz: { cat: 'all', count: 10, mode: 'mix', run: null },
+};
+
+// ================= 헤더 =================
+function renderHeader() {
+  const k = knownCount(), w = wrongIds().length;
+  $('meter').innerHTML = `<span>외운 개념 <b>${k}</b> / ${TERMS.length}</span><span>오답 <b>${w}</b></span>`;
+  const nc = $('noteCount');
+  nc.hidden = !w; nc.textContent = w;
+  document.querySelectorAll('#tabs a').forEach((a) => a.setAttribute('aria-current', a.dataset.tab === ui.tab ? 'page' : 'false'));
+}
+
+// ================= 암기 카드 =================
+function cardDeck() {
+  const s = ui.cards;
+  return s.order.map((id) => BY_ID[id]).filter((t) => (s.cat === 'all' || t.c === s.cat) && (!s.onlyUnknown || !progress.known[t.id]));
+}
+function renderCards() {
+  const s = ui.cards, deck = cardDeck();
+  if (s.idx >= deck.length) s.idx = Math.max(0, deck.length - 1);
+  const t = deck[s.idx];
+  const head = `
+    ${catChips(s.cat, 'card-cat')}
+    <div class="row between">
+      <label class="toggle"><input type="checkbox" id="onlyUnknown" ${s.onlyUnknown ? 'checked' : ''}> 아직 못 외운 것만</label>
+      <button class="btn ghost" data-action="card-shuffle">섞기</button>
+    </div>`;
+  if (!t) {
+    $('view-cards').innerHTML = head + `<div class="panel empty"><b>이 범위의 개념을 모두 외웠어요</b>퀴즈로 확인해 보거나 "아직 못 외운 것만"을 꺼서 다시 복습하세요.</div>`;
+    return;
+  }
+  const known = !!progress.known[t.id];
+  $('view-cards').innerHTML = head + `
+    <div class="progress-line" aria-hidden="true"><div style="width:${((s.idx + 1) / deck.length) * 100}%"></div></div>
+    <div class="flash ${s.flipped ? 'flipped' : ''}" id="flash">
+      <div class="flash-inner" data-action="card-flip" role="button" tabindex="0" aria-label="카드 뒤집기">
+        <div class="face front" aria-hidden="${s.flipped}">
+          <div class="face-head"><span><span class="verb">GET</span> /${esc(t.c)}/${esc(t.id)}</span><span>${s.idx + 1} / ${deck.length}</span></div>
+          <div class="front-body">
+            <span class="cat-tag">${esc(CAT_NAME[t.c])}</span>
+            <div class="term">${esc(t.t)}</div>
+            <div class="en">${esc(t.en)}</div>
+            ${known ? '<div class="known-mark">✓ 외움</div>' : ''}
+          </div>
+          <div class="flip-hint">눌러서 뜻 보기 · Space</div>
+        </div>
+        <div class="face back" aria-hidden="${!s.flipped}">
+          <div class="face-head"><span class="status ok">200 OK</span><span>${s.idx + 1} / ${deck.length}</span></div>
+          <div class="term-sm">${esc(t.t)}</div>
+          <p class="def">${esc(t.d)}</p>
+          <pre class="ex">${esc(t.ex)}</pre>
+        </div>
+      </div>
+    </div>
+    <div class="card-nav">
+      <button class="btn nav-arrow" data-action="card-prev" ${s.idx === 0 ? 'disabled' : ''} aria-label="이전 카드">←</button>
+      <button class="btn" data-action="card-unknown">모르겠어요</button>
+      <button class="btn ok" data-action="card-known">외웠어요</button>
+      <button class="btn nav-arrow" data-action="card-next" ${s.idx >= deck.length - 1 ? 'disabled' : ''} aria-label="다음 카드">→</button>
+    </div>
+    <p class="hint">키보드: Space 뒤집기 · ← → 이동 · K 외웠어요 · J 모르겠어요</p>`;
+}
+function cardMark(known) {
+  const deck = cardDeck(), t = deck[ui.cards.idx];
+  if (!t) return;
+  if (known) progress.known[t.id] = true; else delete progress.known[t.id];
+  save();
+  ui.cards.flipped = false;
+  // "못 외운 것만" 모드에서 외운 카드는 목록에서 빠지므로 인덱스를 그대로 둔다
+  if (!(known && ui.cards.onlyUnknown)) ui.cards.idx = Math.min(ui.cards.idx + 1, deck.length - 1);
+  renderAll();
+}
+
+// ================= 전체 목록 =================
+function renderList() {
+  const q = ui.list.q.trim().toLowerCase();
+  const match = (t) => !q || [t.t, t.en, t.d].some((s) => s.toLowerCase().includes(q));
+  const groups = CATS.map((c) => ({ c, items: TERMS.filter((t) => t.c === c.id && match(t)) })).filter((g) => g.items.length);
+  $('view-list').innerHTML = `
+    <input class="search" id="listSearch" type="search" placeholder="용어나 설명으로 검색 (예: 트랜잭션, cache)" value="${esc(ui.list.q)}">
+    ${groups.length ? groups.map(({ c, items }) => `
+      <div class="group">
+        <h2>${esc(c.name)} · ${items.filter((t) => progress.known[t.id]).length}/${items.length}</h2>
+        <div class="items">
+          ${items.map((t) => `
+            <label class="item">
+              <input type="checkbox" data-known="${t.id}" ${progress.known[t.id] ? 'checked' : ''} aria-label="${esc(t.t)} 외움 표시">
+              <div style="min-width:0"><div class="name">${esc(t.t)}<span class="en">${esc(t.en)}</span></div><p>${esc(t.d)}</p></div>
+            </label>`).join('')}
+        </div>
+      </div>`).join('') : `<div class="panel empty"><b>검색 결과가 없어요</b>다른 단어로 찾아보세요.</div>`}`;
+}
+
+// ================= 퀴즈 =================
+function buildQuiz(pool, count, mode, review) {
+  const picked = shuffle(pool).slice(0, Math.min(count, pool.length));
+  const questions = picked.map((t) => {
+    const same = shuffle(TERMS.filter((x) => x.c === t.c && x.id !== t.id));
+    const other = shuffle(TERMS.filter((x) => x.c !== t.c));
+    const distract = [...same, ...other].slice(0, 3);
+    const type = mode === 'mix' ? (Math.random() < 0.5 ? 'def2term' : 'term2def') : mode;
+    return { id: t.id, type, options: shuffle([t, ...distract]).map((x) => x.id), answer: null };
+  });
+  return { questions, i: 0, review, done: false };
+}
+function startQuiz(review) {
+  const s = ui.quiz;
+  const pool = review ? wrongIds().map((id) => BY_ID[id]) : TERMS.filter((t) => s.cat === 'all' || t.c === s.cat);
+  if (!pool.length) return;
+  s.run = buildQuiz(pool, review ? pool.length : s.count, s.mode, review);
+  ui.tab = 'quiz';
+  if (location.hash !== '#quiz') history.replaceState(null, '', '#quiz');
+  renderAll();
+}
+function answer(optId) {
+  const run = ui.quiz.run, q = run.questions[run.i];
+  if (!q || q.answer) return;
+  q.answer = optId;
+  const ok = optId === q.id;
+  if (!ok) {
+    const prev = progress.wrong[q.id];
+    progress.wrong[q.id] = { n: (prev ? prev.n : 0) + 1, at: Date.now() };
+  } else if (run.review) {
+    delete progress.wrong[q.id];   // 오답 복습에서 맞히면 노트에서 빠짐
+  }
+  save();
+  renderAll();
+}
+function nextQuestion() {
+  const run = ui.quiz.run;
+  if (run.i < run.questions.length - 1) run.i++;
+  else {
+    run.done = true;
+    const score = run.questions.filter((q) => q.answer === q.id).length;
+    progress.history = [...progress.history, { at: Date.now(), score, total: run.questions.length }].slice(-20);
+    save();
+  }
+  renderAll();
+}
+function renderQuiz() {
+  const s = ui.quiz, run = s.run, el = $('view-quiz');
+  if (!run) {
+    const poolSize = TERMS.filter((t) => s.cat === 'all' || t.c === s.cat).length;
+    const hist = progress.history.slice(-12);
+    el.innerHTML = `
+      <div class="panel" style="display:flex;flex-direction:column;gap:18px">
+        <div class="field"><span>범위</span>${catChips(s.cat, 'quiz-cat')}</div>
+        <div class="field"><span>문제 수</span>
+          <div class="chips">${[5, 10, 20].map((n) => `<button class="chip" data-action="quiz-count" data-n="${n}" aria-pressed="${s.count === n}">${n}문제</button>`).join('')}</div>
+        </div>
+        <div class="field"><span>문제 유형</span>
+          <div class="chips">
+            ${[['mix', '섞어서'], ['def2term', '설명 보고 용어 고르기'], ['term2def', '용어 보고 설명 고르기']].map(([m, label]) =>
+              `<button class="chip" data-action="quiz-mode" data-mode="${m}" aria-pressed="${s.mode === m}">${label}</button>`).join('')}
+          </div>
+        </div>
+        <div class="row between">
+          <span class="hint">출제 범위 ${poolSize}개 중 ${Math.min(s.count, poolSize)}문제 · 틀린 문제는 오답노트에 쌓입니다</span>
+          <button class="btn primary" data-action="quiz-start">퀴즈 시작</button>
+        </div>
+      </div>
+      ${hist.length ? `<div class="panel"><div class="row between"><span class="hint">최근 점수</span><span class="hint mono">${hist.map((h) => `${h.score}/${h.total}`).slice(-3).join(' · ')}</span></div>
+        <div class="history" style="margin-top:10px" aria-label="최근 퀴즈 점수">${hist.map((h) => `<div title="${h.score}/${h.total}" style="height:${Math.max(6, (h.score / h.total) * 40)}px"></div>`).join('')}</div></div>` : ''}`;
+    return;
+  }
+
+  if (run.done) {
+    const total = run.questions.length;
+    const wrong = run.questions.filter((q) => q.answer !== q.id);
+    const score = total - wrong.length;
+    el.innerHTML = `
+      <div class="panel" style="display:flex;flex-direction:column;gap:14px">
+        <div class="score"><span class="big">${score}<span class="hint" style="font-size:20px"> / ${total}</span></span>
+          <span class="status ${wrong.length ? 'err' : 'ok'}">${wrong.length ? `${wrong.length}개 틀림` : '200 OK · 전부 정답'}</span></div>
+        ${run.review ? `<p class="hint" style="margin:0">맞힌 ${score}개는 오답노트에서 지웠어요.</p>` : ''}
+        ${wrong.length ? `<div class="items">${wrong.map((q) => { const t = BY_ID[q.id]; return `
+          <div class="note"><div class="name">${esc(t.t)}</div><div class="side"><span class="cat-tag">${esc(CAT_NAME[t.c])}</span></div><p>${esc(t.d)}</p></div>`; }).join('')}</div>` : ''}
+        <div class="row">
+          ${wrongIds().length ? `<button class="btn primary" data-action="quiz-review">오답노트 복습 (${wrongIds().length}문제)</button>` : ''}
+          <button class="btn" data-action="quiz-again">같은 설정으로 다시</button>
+          <button class="btn ghost" data-action="quiz-reset">설정으로</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const q = run.questions[run.i], t = BY_ID[q.id];
+  const isD2T = q.type === 'def2term';
+  const answered = !!q.answer, correct = q.answer === q.id;
+  el.innerHTML = `
+    <div class="progress-line" aria-hidden="true"><div style="width:${(run.i / run.questions.length) * 100}%"></div></div>
+    <div class="panel" style="display:flex;flex-direction:column;gap:14px">
+      <div class="q-meta"><span>${run.review ? '오답 복습' : 'Q'} ${run.i + 1} / ${run.questions.length}</span><span>${esc(CAT_NAME[t.c])}</span></div>
+      <div>
+        <div class="hint">${isD2T ? '다음 설명에 해당하는 용어는?' : '다음 용어의 설명으로 맞는 것은?'}</div>
+        <p class="q-prompt ${isD2T ? '' : 'is-term'}">${esc(isD2T ? t.d : t.t)}</p>
+      </div>
+      <div class="choices">
+        ${q.options.map((id, k) => {
+          const o = BY_ID[id];
+          let cls = '';
+          if (answered && id === q.id) cls = 'right';
+          else if (answered && id === q.answer) cls = 'wrong';
+          return `<button class="choice ${cls}" data-action="quiz-answer" data-id="${id}" ${answered ? 'disabled' : ''}>
+            <span class="k">${k + 1}</span><span>${esc(isD2T ? o.t : o.d)}</span></button>`;
+        }).join('')}
+      </div>
+      ${answered ? `
+        <div class="feedback">
+          <div class="row"><span class="status ${correct ? 'ok' : 'err'}">${correct ? '200 OK · 정답' : '400 Bad Request · 오답'}</span>
+            ${correct ? '' : '<span class="hint">오답노트에 추가했어요</span>'}</div>
+          <div><b>${esc(t.t)}</b> <span class="en">${esc(t.en)}</span></div>
+          <p class="def" style="font-size:15px">${esc(t.d)}</p>
+          <pre class="ex">${esc(t.ex)}</pre>
+          <div class="row between">
+            <button class="btn ghost" data-action="quiz-reset">그만하기</button>
+            <button class="btn primary" data-action="quiz-next" id="nextBtn">${run.i < run.questions.length - 1 ? '다음 문제 →' : '결과 보기'}</button>
+          </div>
+        </div>` : `<p class="hint" style="margin:0">숫자키 1–4로도 고를 수 있어요</p>`}
+    </div>`;
+}
+
+// ================= 오답노트 =================
+function renderNotes() {
+  const ids = wrongIds();
+  if (!ids.length) {
+    $('view-notes').innerHTML = `<div class="panel empty"><b>오답노트가 비어 있어요</b>퀴즈에서 틀린 개념이 여기에 모입니다. 오답 복습에서 맞히면 자동으로 지워져요.</div>
+      <div class="row" style="justify-content:center"><a class="btn primary" href="#quiz" style="text-decoration:none">퀴즈 풀러 가기</a></div>`;
+    return;
+  }
+  $('view-notes').innerHTML = `
+    <div class="row between">
+      <span class="hint">많이 틀린 순서 · 복습 퀴즈에서 맞히면 노트에서 빠집니다</span>
+      <button class="btn primary" data-action="quiz-review">오답 복습 퀴즈 (${ids.length}문제)</button>
+    </div>
+    <div class="items">
+      ${ids.map((id) => { const t = BY_ID[id], w = progress.wrong[id]; return `
+        <div class="note">
+          <div class="name">${esc(t.t)} <span class="en" style="font-size:12px">${esc(t.en)}</span></div>
+          <div class="side"><span class="times">✕${w.n}</span><button class="btn ghost" data-action="note-remove" data-id="${id}" style="padding:4px 8px">지우기</button></div>
+          <p>${esc(t.d)}</p>
+          <p class="mono" style="font-size:12px">${esc(CAT_NAME[t.c])} · 마지막으로 틀린 시각 ${fmtDate(w.at)}</p>
+        </div>`; }).join('')}
+    </div>`;
+}
+
+// ================= 렌더 / 이벤트 =================
+function renderAll() {
+  renderHeader();
+  for (const v of ['cards', 'list', 'quiz', 'notes']) $('view-' + v).hidden = v !== ui.tab;
+  ({ cards: renderCards, list: renderList, quiz: renderQuiz, notes: renderNotes })[ui.tab]();
+}
+
+function route() {
+  const h = location.hash.slice(1);
+  ui.tab = ['cards', 'list', 'quiz', 'notes'].includes(h) ? h : 'cards';
+  renderAll();
+}
+window.addEventListener('hashchange', route);
+
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-action]');
+  if (!b) return;
+  const a = b.dataset.action, c = ui.cards, s = ui.quiz;
+  switch (a) {
+    case 'card-cat': c.cat = b.dataset.cat; c.idx = 0; c.flipped = false; break;
+    case 'card-shuffle': c.order = shuffle(c.order); c.idx = 0; c.flipped = false; break;
+    case 'card-flip': c.flipped = !c.flipped; $('flash').classList.toggle('flipped', c.flipped); return;
+    case 'card-prev': c.idx = Math.max(0, c.idx - 1); c.flipped = false; break;
+    case 'card-next': c.idx++; c.flipped = false; break;
+    case 'card-known': return cardMark(true);
+    case 'card-unknown': return cardMark(false);
+    case 'quiz-cat': s.cat = b.dataset.cat; break;
+    case 'quiz-count': s.count = Number(b.dataset.n); break;
+    case 'quiz-mode': s.mode = b.dataset.mode; break;
+    case 'quiz-start': return startQuiz(false);
+    case 'quiz-review': return startQuiz(true);
+    case 'quiz-again': return startQuiz(s.run && s.run.review);
+    case 'quiz-reset': s.run = null; break;
+    case 'quiz-answer': return answer(b.dataset.id);
+    case 'quiz-next': return nextQuestion();
+    case 'note-remove': delete progress.wrong[b.dataset.id]; save(); break;
+    default: return;
+  }
+  renderAll();
+});
+
+document.addEventListener('change', (e) => {
+  if (e.target.id === 'onlyUnknown') { ui.cards.onlyUnknown = e.target.checked; ui.cards.idx = 0; ui.cards.flipped = false; renderAll(); }
+  const id = e.target.dataset && e.target.dataset.known;
+  if (id) { if (e.target.checked) progress.known[id] = true; else delete progress.known[id]; save(); renderHeader(); renderList(); }
+});
+
+document.addEventListener('input', (e) => {
+  if (e.target.id !== 'listSearch') return;
+  ui.list.q = e.target.value;
+  const pos = e.target.selectionStart;
+  renderList();
+  const inp = $('listSearch'); inp.focus(); inp.setSelectionRange(pos, pos);
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.matches('input, textarea') || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (ui.tab === 'cards') {
+    const c = ui.cards, deck = cardDeck();
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); c.flipped = !c.flipped; const f = $('flash'); if (f) f.classList.toggle('flipped', c.flipped); }
+    else if (e.key === 'ArrowRight' && c.idx < deck.length - 1) { c.idx++; c.flipped = false; renderAll(); }
+    else if (e.key === 'ArrowLeft' && c.idx > 0) { c.idx--; c.flipped = false; renderAll(); }
+    else if (e.key === 'k' || e.key === 'K') cardMark(true);
+    else if (e.key === 'j' || e.key === 'J') cardMark(false);
+  } else if (ui.tab === 'quiz' && ui.quiz.run && !ui.quiz.run.done) {
+    const q = ui.quiz.run.questions[ui.quiz.run.i];
+    const n = Number(e.key);
+    if (!q.answer && n >= 1 && n <= q.options.length) answer(q.options[n - 1]);
+    else if (q.answer && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); nextQuestion(); }
+  }
+});
+
+// ================= 시작 =================
+progress = normalize(readLocal());
+ui.cards.order = shuffle(ui.cards.order);
+route();
+initCloud();
+</script>
